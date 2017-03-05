@@ -32,17 +32,18 @@ def add_delta2datetime(sourcedate, years=0, months=0, weeks=0, days=0, hours=0, 
 	Прибавляет заданное значение к datetime. В отличиче от timedelta,
 	может принимать недели, месяцы и годы.
 	'''
+	
 	days += weeks * 7
 	
-	seconds = sourcedate.second + seconds
+	seconds = getattr(sourcedate, 'second', 0) + seconds
 	minutes += seconds // 60
 	seconds = seconds % 60
 	
-	minutes = sourcedate.minute + minutes
+	minutes = getattr(sourcedate, 'minute', 0) + minutes
 	hours += minutes // 60
 	minutes = minutes % 60
 	
-	hours = sourcedate.hour + hours
+	hours = getattr(sourcedate, 'hour', 0) + hours
 	days += hours // 24
 	hours = hours % 24
 	
@@ -60,7 +61,42 @@ def add_delta2datetime(sourcedate, years=0, months=0, weeks=0, days=0, hours=0, 
 		day = day - days_limit
 		days_limit = calendar.monthrange(year, month)[1]
 	
-	return datetime.datetime(year, month, day, hours, minutes, seconds)
+	is_datetime = isinstance(sourcedate, datetime.datetime)
+	if any([is_datetime, hours, minutes, seconds]):
+		return datetime.datetime(year, month, day, hours, minutes, seconds)
+	else:
+		return datetime.date(year, month, day)
+
+
+def annihilator(sourcedate, delta_sizes):
+	i = 10
+	for delta_size in delta_sizes:
+		if delta_size == 'weeks':
+			continue
+		i = min(i, annihilator.sizes.index(delta_size))
+	
+	#если обнуляем по неделе - приводим дату к понедельнику этой недели
+	if i >= 2 and 'weeks' in delta_sizes:
+		sd_wday = datetime.datetime.weekday(sourcedate)
+		sourcedate = sourcedate - datetime.timedelta(days=sd_wday)
+		return sourcedate.date()
+	
+	#не должно происходить, но на всякий случай
+	if i == 10:
+		return sourcedate
+	
+	#создаём timetuple с обнуленными значениями
+	default = (0, 1, 1, 0, 0, 0)
+	sourcedate = sourcedate.timetuple()
+	if len(sourcedate) == 3:
+		sourcedate = sourcedate + (0, 0, 0)
+	result = sourcedate[:i+1] +  default[i+1:]
+	
+	if i >= 3:
+		return datetime.datetime(*result)
+	else:
+		return datetime.date(*result[:-3])
+annihilator.sizes = ('years', 'months', 'days', 'hours', 'minutes', 'seconds')
 
 
 class my_timedelta:
@@ -72,6 +108,7 @@ class my_timedelta:
 	def __init__(self, **kwargs):
 		self.elements = []
 		self.positive = True
+		self.is_next = False
 		if kwargs:
 			self.elements.append(kwargs)
 	
@@ -91,6 +128,11 @@ class my_timedelta:
 			new.elements = self.elements.copy()
 			new.elements.extend(obj.elements)
 			return new
+		
+		#если "следующий [месяц]", обнуляем всё, что меньше [месяц]
+		if self.is_next:
+			obj = annihilator(obj, self.elements[0].keys())
+		
 		for el in self.elements:
 			# +dict
 			if type(el) is dict:

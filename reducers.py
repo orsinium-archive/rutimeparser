@@ -25,6 +25,8 @@ def offset(nodes):
 	delta, offset = extract_values(nodes, 'delta', 'delta_offset')
 	if offset < 0:
 		delta.positive = False
+	elif offset == 1:
+		delta.is_next = True
 	return Node(nodes[0].i, 'delta', extract_word(nodes), delta)
 
 

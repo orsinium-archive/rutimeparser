@@ -45,7 +45,7 @@ def number(word):
 def delta_offset(word):
 	if word in ('через', ):
 		return 2
-	if word in ('следующей', 'следующий', 'следующую', 'следующее'):
+	if word in rules.delta_next:
 		return 1
 	if word in ('назад', 'за'):
 		return -1
