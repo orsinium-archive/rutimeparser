@@ -19,14 +19,17 @@ def make_mutations(*texts):
 				yield template.format(case)
 
 
-morning = datetime.combine(datetime.now().date(), time(9, 0))
+now = datetime.now()
+morning = datetime.combine(now.date(), time(9, 0))
+monday = now - timedelta(days=datetime.weekday(now))
+monday_morning = datetime.combine(monday.date(), morning.time())
 
 common_tests = (
-	('сегодня', datetime.now(), True),
-	('завтра', datetime.now() + timedelta(days=1), True),
-	('вчера', datetime.now() - timedelta(days=1), True),
-	('послезавтра', datetime.now() + timedelta(days=2), True),
-	('позавчера', datetime.now() - timedelta(days=2), True),
+	('сегодня', now, True),
+	('завтра', now + timedelta(days=1), True),
+	('вчера', now - timedelta(days=1), True),
+	('послезавтра', now + timedelta(days=2), True),
+	('позавчера', now - timedelta(days=2), True),
 	
 	('28.02.2017 17:45', datetime(2017, 2, 28, 17, 45), False),
 	('2017-02-28 18:49', datetime(2017, 2, 28, 18, 49), False),
@@ -48,11 +51,25 @@ common_tests = (
 	('2 часа 17 минут назад', datetime.now() - timedelta(hours=2, minutes=17), False),
 	('два часа семнадцать минут назад', datetime.now() - timedelta(hours=2, minutes=17), False),
 	
-	
 	('утром', morning, False),
 	('сегодня утром', morning, False),
 	('завтра утром', morning + timedelta(days=1), False),
 	('вчера утром', morning - timedelta(days=1), False),
+	
+	('завтра в десять часов', morning + timedelta(days=1, hours=1), False),
+	('завтра в 10 часов 14 минут', morning + timedelta(days=1, hours=1, minutes=14), False),
+	('послезавтра в 10 часов 17 минут', morning + timedelta(days=2, hours=1, minutes=17), False),
+	('послезавтра в 10:17', morning + timedelta(days=2, hours=1, minutes=17), False),
+	
+	('в понедельник', monday, True),
+	('в следующий понедельник', monday + timedelta(days=7), True),
+	('в предыдущий понедельник', monday - timedelta(days=7), True),
+	('в среду', monday + timedelta(days=2), True),
+	('в следующую среду', monday + timedelta(days=9), True),
+	('в предыдущую среду', monday - timedelta(days=5), True),
+	('на следующей неделе в среду', monday + timedelta(days=9), True),
+	
+	('в три часа', morning - timedelta(hours=6), False)
 	)
 
 
