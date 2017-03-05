@@ -42,7 +42,11 @@ def date_and_time(nodes):
 	'[22.02.2017] [17:45]'
 	date, time = extract_values(nodes, 'date', 'time')
 	if not date:
-		date = datetime.now().date()
+		date = extract_values(nodes, 'datetime')[0]
+		if date:
+			date = date.date()
+		else:
+			date = datetime.now().date()
 	value = datetime.combine(date, time)
 	return Node(nodes[0].i, 'datetime', extract_word(nodes), value)
 
@@ -106,7 +110,6 @@ templates = (
 	
 	(date_and_time, 'date', 'time'), # -> datetime
 	(date_and_time, 'time', 'date'), # -> datetime
-	(date_and_time, 'time'), # -> datetime
 	
 	(dt_and_delta, 'datetime', 'delta'), # -> datetime
 	(dt_and_delta, 'delta', 'datetime'), # -> datetime
@@ -126,4 +129,10 @@ templates = (
 	(weekday, 'weekday', 'date'), # -> date
 	(weekday, 'date', 'weekday'), # -> date
 	(weekday, 'weekday'), # -> date
+	
+	(date_and_time, 'date', 'time'), # -> datetime
+	(date_and_time, 'time', 'date'), # -> datetime
+	(date_and_time, 'datetime', 'time'), # -> datetime
+	(date_and_time, 'time', 'datetime'), # -> datetime
+	(date_and_time, 'time'), # -> datetime
 	)

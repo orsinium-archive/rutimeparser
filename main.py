@@ -93,6 +93,8 @@ class TimeParser:
 		if 'datetime' in nodes:
 			return nodes['datetime']
 		now = datetime.now()
+		if 'date' in nodes and 'time' in nodes:
+			return datetime.combine(nodes['date'], nodes['time'])
 		if 'time' in nodes:
 			return datetime.combine(now.date(), nodes['time'])
 		if 'date' in nodes:

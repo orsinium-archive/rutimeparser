@@ -77,6 +77,7 @@ common_tests = (
 	('через 2 дня', now + timedelta(days=2), False),
 	('через неделю', now + timedelta(days=7), False),
 	('через 2 недели', now + timedelta(days=14), False),
+	('через 2 недели в 17:39', datetime.combine(now.date(), time(17, 39)) + timedelta(days=14), False),
 	
 	('утром', morning, False),
 	('сегодня утром', morning, False),
@@ -120,22 +121,10 @@ class TestParser(unittest.TestCase):
 	
 	def test_common(self):
 		for src_text, good, is_date in common_tests:
-			for text in make_mutations(src_text):
-				with self.subTest(src_text=src_text, text=text):
+			with self.subTest(src_text=src_text):
+				for text in make_mutations(src_text):
 					result = parse_time(text)
 					self.compare(result, good, is_date)
-
-
-class TestDate(unittest.TestCase):
-	
-	def compare(self, result, good):
-		good_floor = good - timedelta(seconds=3)
-		good_ceil = good + timedelta(seconds=3)
-		if isinstance(good, datetime):
-			good_floor = good_floor.date()
-			good_ceil = good_ceil.date()
-		self.assertGreaterEqual(result, good_floor)
-		self.assertLessEqual(result, good_ceil)
 	
 	def test_delta(self):
 		texts = (
@@ -150,7 +139,37 @@ class TestDate(unittest.TestCase):
 		for text in make_mutations(*texts):
 			with self.subTest(text=text):
 				result = parse_time(text)
-				self.compare(result, good)
+				self.compare(result, good, True)
+	
+	def test_weekday(self):
+		year = now.year
+		good = datetime(year, 4, 1).date()
+		if good < now.date():
+			good = datetime(year + 1, 4, 1).date()
+		
+		wd = datetime.weekday(good)
+		days = 7 - (wd - 2) % 7
+		good = good + timedelta(days=days)
+		
+		for text in make_mutations('в апреле в среду'):
+			with self.subTest(text=text):
+				result = parse_time(text)
+				self.compare(result, good, True)
+	
+	def test_weekday_and_time(self):
+		good = datetime(now.year, 4, 1, 17, 43)
+		if good < now:
+			good = datetime(now.year+1, 4, 1, 17, 43)
+		
+		wd = datetime.weekday(good)
+		days = 7 - (wd - 3) % 7
+		good = good + timedelta(days=days)
+		
+		src_text = 'в апреле в четверг в 17:43'
+		with self.subTest(text=src_text):
+			for text in make_mutations(src_text):
+				result = parse_time(text)
+				self.compare(result, good, False)
 
 
 if __name__ == '__main__':
