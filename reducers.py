@@ -25,7 +25,8 @@ def offset(nodes):
 	delta, offset = extract_values(nodes, 'delta', 'delta_offset')
 	if offset < 0:
 		delta.positive = False
-	elif offset == 1:
+	delta.is_absolute = False
+	if offset == 1:
 		delta.is_next = True
 	return Node(nodes[0].i, 'delta', extract_word(nodes), delta)
 
@@ -81,6 +82,8 @@ def weekday(nodes):
 	else:
 		days = wday - dt_wday
 	value = dt + timedelta(days=days)
+	if offset and offset == -1:
+		value -= timedelta(days=7)
 	
 	return Node(nodes[0].i, cat, extract_word(nodes), value)
 

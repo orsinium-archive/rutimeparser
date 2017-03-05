@@ -68,12 +68,13 @@ def add_delta2datetime(sourcedate, years=0, months=0, weeks=0, days=0, hours=0, 
 		return datetime.date(year, month, day)
 
 
-def annihilator(sourcedate, delta_sizes):
+def annihilator(sourcedate, delta_sizes, offset=0):
 	i = 10
 	for delta_size in delta_sizes:
 		if delta_size == 'weeks':
 			continue
 		i = min(i, annihilator.sizes.index(delta_size))
+	i -= offset
 	
 	#если обнуляем по неделе - приводим дату к понедельнику этой недели
 	if i >= 2 and 'weeks' in delta_sizes:
@@ -108,6 +109,7 @@ class my_timedelta:
 	def __init__(self, **kwargs):
 		self.elements = []
 		self.positive = True
+		self.is_absolute = True
 		self.is_next = False
 		if kwargs:
 			self.elements.append(kwargs)
@@ -130,6 +132,8 @@ class my_timedelta:
 			return new
 		
 		#если "следующий [месяц]", обнуляем всё, что меньше [месяц]
+		if self.is_absolute:
+			obj = annihilator(obj, self.elements[0].keys(), offset=1)
 		if self.is_next:
 			obj = annihilator(obj, self.elements[0].keys())
 		
