@@ -43,14 +43,9 @@ def number(word):
 		return int(word)
 
 def delta_offset(word):
-	if word in ('через', ):
-		return 2
-	if word in rules.delta_next:
-		return 1
-	if word in ('назад', 'за'):
-		return -1
-	if word in ('перед', ):
-		return -2
+	for offset, *words in rules.offset:
+		if word in words:
+			return offset
 
 def delta_size(word):
 	for result, words in rules.delta_sizes:
