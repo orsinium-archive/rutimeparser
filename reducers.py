@@ -70,14 +70,16 @@ def weekday(nodes):
 	'[в апреле] [в следующий] [вторник]'
 	offset, wday, dt = extract_values(nodes, 'delta_offset', 'weekday', 'datetime')
 	if not dt:
-		cat = 'date'
 		dt = extract_values(nodes, 'date')[0]
 		if not dt:
 			dt = datetime.now().date()
-	else:
-		cat = 'datetime'
+	
+	cat = 'datetime' if isinstance(dt, datetime) else 'date'
+	
 	dt_wday = datetime.weekday(dt)
-	if offset and offset == 1:
+	if (offset and offset == 1) \
+	or cat == 'date' and dt != datetime.now().date() \
+	or cat == 'datetime' and dt.date() != datetime.now().date():
 		days = 7 - (dt_wday - wday) % 7
 	else:
 		days = wday - dt_wday
