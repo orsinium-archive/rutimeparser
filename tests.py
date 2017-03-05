@@ -6,7 +6,7 @@ templates = (
 	'Я приеду {}',
 	'Вызови такси {}. Мне нужно будет съездить в ленту',
 	'Напомни мне {} купить билеты',
-	'Что у меня запланировано на {}?',
+	'Что у меня запланировано {}?',
 	'Напомни {} купить 10 яиц и 2 литра молока.',
 	)
 
@@ -18,6 +18,19 @@ def make_mutations(*texts):
 			for template in templates:
 				yield template.format(case)
 
+
+def date_with_year(month, day):
+	now = datetime.now()
+	result = datetime(now.year, month, day).date()
+	if result >= now.date():
+		return result
+	else:
+		return datetime(now.year+1, month, day).date()
+
+def datetime_with_year(month, day, hours=0, minutes=0, seconds=0):
+	d = date_with_year(month, day)
+	t = time(hours, minutes, seconds)
+	return datetime.combine(d, t)
 
 now = datetime.now()
 morning = datetime.combine(now.date(), time(9, 0))
@@ -31,30 +44,45 @@ common_tests = (
 	('послезавтра', now + timedelta(days=2), True),
 	('позавчера', now - timedelta(days=2), True),
 	
+	('в декабре', date_with_year(12, 1), True),
+	('1 декабря', date_with_year(12, 1), True),
+	('в январе', date_with_year(1, 1), True),
+	('1 января', date_with_year(1, 1), True),
 	('28.02.2017 17:45', datetime(2017, 2, 28, 17, 45), False),
 	('2017-02-28 18:49', datetime(2017, 2, 28, 18, 49), False),
+	('18 февраля в 17:49', datetime_with_year(2, 18, 17, 49), False),
+	('31 декабря в 17:49', datetime_with_year(12, 31, 17, 49), False),
 	
-	('сейчас', datetime.now(), False),
-	('через час', datetime.now() + timedelta(hours=1), False),
-	('через полчаса', datetime.now() + timedelta(minutes=30), False),
-	('через полтора часа', datetime.now() + timedelta(hours=1, minutes=30), False),
-	('через 2 часа', datetime.now() + timedelta(hours=2), False),
-	('через два часа', datetime.now() + timedelta(hours=2), False),
-	('через 3 часа 19 минут', datetime.now() + timedelta(hours=3, minutes=19), False),
-	('через три часа девятнадцать минут', datetime.now() + timedelta(hours=3, minutes=19), False),
+	('сейчас', now, False),
+	('через час', now + timedelta(hours=1), False),
+	('через полчаса', now + timedelta(minutes=30), False),
+	('через полтора часа', now + timedelta(hours=1, minutes=30), False),
+	('через 2 часа', now + timedelta(hours=2), False),
+	('через два часа', now + timedelta(hours=2), False),
+	('через 3 часа 19 минут', now + timedelta(hours=3, minutes=19), False),
+	('через три часа девятнадцать минут', now + timedelta(hours=3, minutes=19), False),
 	
-	('час назад', datetime.now() - timedelta(hours=1), False),
-	('полчаса назад', datetime.now() - timedelta(minutes=30), False),
-	('полтора часа назад', datetime.now() - timedelta(hours=1, minutes=30), False),
-	('2 часа назад', datetime.now() - timedelta(hours=2), False),
-	('два часа назад', datetime.now() - timedelta(hours=2), False),
-	('2 часа 17 минут назад', datetime.now() - timedelta(hours=2, minutes=17), False),
-	('два часа семнадцать минут назад', datetime.now() - timedelta(hours=2, minutes=17), False),
+	('час назад', now - timedelta(hours=1), False),
+	('полчаса назад', now - timedelta(minutes=30), False),
+	('полтора часа назад', now - timedelta(hours=1, minutes=30), False),
+	('2 часа назад', now - timedelta(hours=2), False),
+	('два часа назад', now - timedelta(hours=2), False),
+	('2 часа 17 минут назад', now - timedelta(hours=2, minutes=17), False),
+	('два часа семнадцать минут назад', now - timedelta(hours=2, minutes=17), False),
+	
+	('через день 2 часа', now + timedelta(days=1, hours=2), False),
+	('через 2 дня 3 часа', now + timedelta(days=2, hours=3), False),
+	
+	('через день', now + timedelta(days=1), False),
+	('через 2 дня', now + timedelta(days=2), False),
+	('через неделю', now + timedelta(days=7), False),
+	('через 2 недели', now + timedelta(days=14), False),
 	
 	('утром', morning, False),
 	('сегодня утром', morning, False),
 	('завтра утром', morning + timedelta(days=1), False),
 	('вчера утром', morning - timedelta(days=1), False),
+	('28.02.2017 утром', datetime(2017, 2, 28, 9, 0), False),
 	
 	('завтра в десять часов', morning + timedelta(days=1, hours=1), False),
 	('завтра в 10 часов 14 минут', morning + timedelta(days=1, hours=1, minutes=14), False),
@@ -68,8 +96,14 @@ common_tests = (
 	('в следующую среду', monday + timedelta(days=9), True),
 	('в предыдущую среду', monday - timedelta(days=5), True),
 	('на следующей неделе в среду', monday + timedelta(days=9), True),
+	('на следующей неделе', monday + timedelta(days=7), True),
 	
-	('в три часа', morning - timedelta(hours=6), False)
+	('в следующий час', datetime.combine(now.date(), time(now.hour+1, 0)), False),
+	('в следующий час в 15 минут', datetime.combine(now.date(), time(now.hour+1, 15)), False),
+	('на следующий день', now + timedelta(days=1), True),
+	('в следующем месяце', datetime(now.year, now.month+1, 1, 0, 0).date(), True),
+	
+	('в три часа', morning - timedelta(hours=6), False),
 	)
 
 
@@ -95,30 +129,25 @@ class TestParser(unittest.TestCase):
 class TestDate(unittest.TestCase):
 	
 	def compare(self, result, good):
-		good_floor = good - timedelta(seconds=2)
-		good_ceil = good + timedelta(seconds=2)
+		good_floor = good - timedelta(seconds=3)
+		good_ceil = good + timedelta(seconds=3)
 		if isinstance(good, datetime):
 			good_floor = good_floor.date()
 			good_ceil = good_ceil.date()
 		self.assertGreaterEqual(result, good_floor)
 		self.assertLessEqual(result, good_ceil)
 	
-	def test_december(self):
-		year = datetime.now().year
-		good = datetime(year, 12, 1)
-		if good < datetime.now():
-			good = datetime(year + 1, 12, 1)
-		for text in make_mutations('в декабре', '1 декабря'):
-			with self.subTest(text=text):
-				result = parse_time(text)
-				self.compare(result, good)
-	
-	def test_january(self):
-		year = datetime.now().year
-		good = datetime(year, 1, 1)
-		if good < datetime.now():
-			good = datetime(year + 1, 1, 1)
-		for text in make_mutations('в январе', '1 января'):
+	def test_delta(self):
+		texts = (
+			'8 апреля у меня поезд. Напомни за день.',
+			'9 апреля у меня поезд. Напомни за 2 дня.',
+			'6 апреля через день',
+			)
+		year = now.year
+		good = datetime(year, 4, 7)
+		if good < now:
+			good = datetime(year + 1, 4, 7)
+		for text in make_mutations(*texts):
 			with self.subTest(text=text):
 				result = parse_time(text)
 				self.compare(result, good)
