@@ -1,5 +1,5 @@
 import unittest
-from main import parse_time
+from timeparser import parse_time
 from datetime import datetime, timedelta, time
 
 templates = (
@@ -78,6 +78,7 @@ common_tests = (
 	('через неделю', now + timedelta(days=7), False),
 	('через 2 недели', now + timedelta(days=14), False),
 	('через 2 недели в 17:39', datetime.combine(now.date(), time(17, 39)) + timedelta(days=14), False),
+	('через 2 дня утром', morning + timedelta(days=2), False),
 	
 	('утром', morning, False),
 	('сегодня утром', morning, False),
