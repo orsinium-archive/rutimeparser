@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from utils import my_timedelta, Node, extract_word, extract_values
+from .utils import my_timedelta, Node, extract_word, extract_values
 
 def number_and_month(nodes):
 	'[22] [февраля]'

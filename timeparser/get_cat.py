@@ -4,7 +4,8 @@
 '''
 
 from datetime import datetime, timedelta
-import rules
+
+from . import rules
 
 
 def date(word):

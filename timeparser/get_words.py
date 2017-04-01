@@ -1,4 +1,5 @@
-from numbers import numbers, replaces
+from .numbers import numbers, replaces
+
 import re
 rex = re.compile(r'[^\w\.\-\:\/]+')
 

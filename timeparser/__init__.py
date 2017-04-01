@@ -1,8 +1,10 @@
-from get_words import get_words
-from get_cat import get_cat
-from utils import ngrams, Node
-from reducers import templates
 from datetime import datetime
+
+from .get_words import get_words
+from .get_cat import get_cat
+from .utils import ngrams, Node
+from .reducers import templates
+
 
 class TimeParser:
 	'''
@@ -63,6 +65,23 @@ class TimeParser:
 		self.nodes = new_nodes
 		return new_nodes
 	
+	def get_junk_chains(self):
+		chains = []
+		chain = []
+		for node in self.nodes:
+			if node.cat == 'junk':
+				chain.append(node)
+			else:
+				chains.append(chain)
+				chain = []
+		chains.append(chain)
+		
+		good_chains = []
+		for chain in chains:
+			if len(chain) > 2 or any([len(node.word) > 3 for node in chain]):
+				good_chains.append(chain)
+		return good_chains
+	
 	def remove_junk(self):
 		'''
 		Удаляет из текста все слова, не связанные с датой и временем
@@ -99,6 +118,18 @@ class TimeParser:
 			return datetime.combine(now.date(), nodes['time'])
 		if 'date' in nodes:
 			return nodes['date']
+	
+	def get_clear_text(self):
+		result = []
+		for chain in self.get_junk_chains():
+			for node in chain:
+				result.append(node.word)
+		return ' '.join(result)
+
+	def get_last_clear_text(self):
+		result = []
+		chain = list(self.get_junk_chains())[-1]
+		return ' '.join([node.word for node in chain])
 
 
 def parse_time(text, remove_junk=True, debug=False):
@@ -117,6 +148,25 @@ def parse_time(text, remove_junk=True, debug=False):
 	return tp.get_datetime()
 
 
-if __name__ == '__main__':
-	for test in open('test_strings', 'r'):
-		print(test.strip(), '\x1B[31m', parse_time(test), '\x1B[0m')
+def get_clear_text(text, debug=False):
+	'''
+	Возвращает фрагменты, не связанные с датой и временем
+	'''
+	tp = TimeParser(text)
+	tp.make_nodes()
+	if debug:
+		from pprint import pprint
+		pprint(tp.nodes)
+	return tp.get_clear_text()
+
+
+def get_last_clear_text(text, debug=False):
+	'''
+	Возвращает последний фрагмент, не связанный с датой и временем
+	'''
+	tp = TimeParser(text)
+	tp.make_nodes()
+	if debug:
+		from pprint import pprint
+		pprint(tp.nodes)
+	return tp.get_last_clear_text()
