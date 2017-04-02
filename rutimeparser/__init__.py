@@ -2,7 +2,7 @@ from datetime import datetime
 
 from .get_words import get_words
 from .get_cat import get_cat
-from .utils import ngrams, Node
+from .utils import ngrams, Node, get_now, change_timezone
 from .reducers import templates
 
 
@@ -12,22 +12,27 @@ class TimeParser:
 	Возвращает datetime, date или None.
 	'''
 	
-	def __init__(self, text='', words=None):
+	def __init__(self, text='', words=None, tz=None, now=None):
 		if not words:
 			if not text:
 				raise ValueError('Please, set text or words for TimeParser.')
 			self.words = tuple(get_words(text))
 		else:
 			self.words = words
+		
+		self.tz = tz
+		self.now = now if now else get_now(self.tz)
+		
+		if not self.tz and now and now.tzinfo:
+			self.tz = str(dt.tzinfo)
 	
 	def make_nodes(self):
 		'''
 		Генерирует список нод на основе слов исходного текста
 		'''
-		
 		self.nodes = []
 		for i, word in enumerate(self.words):
-			cat, value = get_cat(word)
+			cat, value = get_cat(word, self.now)
 			self.nodes.append(Node(i, cat, word, value))
 		return self.nodes
 	
@@ -95,7 +100,7 @@ class TimeParser:
 		for f, *template in templates:
 			nodes_samples = list(self.get_nodes_by_template(*template))
 			for nodes in nodes_samples:
-				new_node = f(nodes)
+				new_node = f(nodes, now=self.now)
 				self.replace(nodes[0], nodes[-1], new_node)
 	
 	def __dict__(self):
@@ -110,10 +115,11 @@ class TimeParser:
 		'''
 		nodes = self.__dict__()
 		if 'datetime' in nodes:
-			return nodes['datetime']
+			return change_timezone(nodes['datetime'], self.tz)
 		now = datetime.now()
 		if 'date' in nodes and 'time' in nodes:
-			return datetime.combine(nodes['date'], nodes['time'])
+			dt = datetime.combine(nodes['date'], nodes['time'])
+			return change_timezone(dt, self.tz)
 		if 'time' in nodes:
 			return datetime.combine(now.date(), nodes['time'])
 		if 'date' in nodes:
@@ -128,16 +134,19 @@ class TimeParser:
 
 	def get_last_clear_text(self):
 		result = []
-		chain = list(self.get_junk_chains())[-1]
+		chains = list(self.get_junk_chains())
+		if not chains:
+			return ''
+		chain = chains[-1]
 		return ' '.join([node.word for node in chain])
 
 
-def parse_time(text, remove_junk=True, debug=False):
+def parse_time(text, *, tz=None, now=None, remove_junk=True, debug=False):
 	'''
 	Для тех, кто не любит классы. Выполняет все необходимые операции
 	с текстом и возвращает результат.
 	'''
-	tp = TimeParser(text)
+	tp = TimeParser(text, tz=tz, now=now)
 	tp.make_nodes()
 	if debug:
 		from pprint import pprint

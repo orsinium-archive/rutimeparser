@@ -1,5 +1,5 @@
 import unittest
-from timeparser import parse_time
+from rutimeparser import parse_time
 from datetime import datetime, timedelta, time
 
 templates = (

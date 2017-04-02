@@ -1,8 +1,36 @@
 import calendar
 import datetime
+from pytz import timezone
 
 from collections import namedtuple
 Node = namedtuple('Node', ['i', 'cat', 'word', 'value'])
+
+def get_now(tz):
+	if tz:
+		now = datetime.datetime.utcnow()
+	else:
+		now = datetime.datetime.now()
+	
+	#убрать микросекунды:
+	t = now.time()
+	t = datetime.time(t.hour, t.minute, t.second)
+	now = datetime.datetime.combine(now.date(), t)
+	
+	if not tz:
+		return now
+	return timezone(tz).fromutc(now)
+
+
+def change_timezone(dt, tz):
+	'Изменить часовой пояс для datetime/time'
+	if not tz:
+		return dt
+	if dt.tzname():
+		#изменить часовой пояс
+		return dt.astimezone(timezone(tz))
+	else:
+		#установить часовой пояс
+		return timezone(tz).localize(dt, is_dst=None)
 
 
 def ngrams(l, n):
@@ -13,6 +41,7 @@ def ngrams(l, n):
 def extract_word(nodes):
 	'Извлекает и объединяет все слова из переданных нод'
 	return ' '.join([node.word for node in nodes])
+
 
 def extract_values(nodes, *template):
 	'''

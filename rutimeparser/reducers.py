@@ -1,18 +1,18 @@
 from datetime import datetime, timedelta
 from .utils import my_timedelta, Node, extract_word, extract_values
 
-def number_and_month(nodes):
+def number_and_month(nodes, now):
 	'[22] [февраля]'
 	number, month = extract_values(nodes, 'number', 'month')
 	if not number:
 		number = 1
-	year = datetime.now().year
+	year = now.year
 	value = datetime(year, month, number).date()
-	if value < datetime.now().date():
+	if value < now.date():
 		value = datetime(year + 1, month, number).date()
 	return Node(nodes[0].i, 'date', extract_word(nodes), value)
 
-def make_delta(nodes):
+def make_delta(nodes, **kwargs):
 	'[1] [час]'
 	number, size = extract_values(nodes, 'number', 'delta_size')
 	if not number:
@@ -20,7 +20,7 @@ def make_delta(nodes):
 	value = my_timedelta(**{size: number})
 	return Node(nodes[0].i, 'delta', extract_word(nodes), value)
 
-def offset(nodes):
+def offset(nodes, **kwargs):
 	'[неделю] [назад]'
 	delta, offset = extract_values(nodes, 'delta', 'delta_offset')
 	if offset < 0:
@@ -31,14 +31,14 @@ def offset(nodes):
 	return Node(nodes[0].i, 'delta', extract_word(nodes), delta)
 
 
-def sum_delta(nodes):
+def sum_delta(nodes, **kwargs):
 	'[2 часа] [17 минут]'
 	value = my_timedelta()
 	for node in nodes:
 		value += node.value
 	return Node(nodes[0].i, 'delta', extract_word(nodes), value)
 	
-def date_and_time(nodes):
+def date_and_time(nodes, now):
 	'[22.02.2017] [17:45]'
 	date, time = extract_values(nodes, 'date', 'time')
 	if not date:
@@ -46,19 +46,19 @@ def date_and_time(nodes):
 		if date:
 			date = date.date()
 		else:
-			date = datetime.now().date()
+			date = now.date()
 	value = datetime.combine(date, time)
 	return Node(nodes[0].i, 'datetime', extract_word(nodes), value)
 
-def dt_and_delta(nodes):
+def dt_and_delta(nodes, now):
 	'[завтра утром] [через час]'
 	dt, delta = extract_values(nodes, 'datetime', 'delta')
 	if not dt:
-		dt = datetime.now()
+		dt = now
 	value = delta + dt
 	return Node(nodes[0].i, 'datetime', extract_word(nodes), value)
 
-def date_and_delta(nodes):
+def date_and_delta(nodes, **kwargs):
 	'[завтра утром] [через час]'
 	date, delta = extract_values(nodes, 'date', 'delta')
 	twilight = datetime(2000, 1, 1, 0, 0).time()
@@ -70,7 +70,7 @@ def date_and_delta(nodes):
 		cat = 'datetime'
 	return Node(nodes[0].i, cat, extract_word(nodes), value)
 
-def weekday(nodes):
+def weekday(nodes, **kwargs):
 	'[в апреле] [в следующий] [вторник]'
 	offset, wday, dt = extract_values(nodes, 'delta_offset', 'weekday', 'datetime')
 	if not dt:
