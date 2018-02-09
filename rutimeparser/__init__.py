@@ -24,7 +24,7 @@ class TimeParser:
         self.now = now if now else get_now(self.tz)
 
         if not self.tz and now and now.tzinfo:
-            self.tz = str(dt.tzinfo)
+            self.tz = str(now.tzinfo)
 
     def make_nodes(self):
         '''
@@ -133,7 +133,6 @@ class TimeParser:
         return ' '.join(result)
 
     def get_last_clear_text(self):
-        result = []
         chains = list(self.get_junk_chains())
         if not chains:
             return ''

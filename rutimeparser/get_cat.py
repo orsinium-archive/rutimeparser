@@ -5,7 +5,6 @@
 
 from datetime import datetime, timedelta
 
-from .utils import change_timezone
 from . import rules
 
 

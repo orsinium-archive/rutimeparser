@@ -12,7 +12,7 @@ def get_now(tz):
     else:
         now = datetime.datetime.now()
 
-    #убрать микросекунды:
+    # убрать микросекунды:
     t = now.time()
     t = datetime.time(t.hour, t.minute, t.second)
     now = datetime.datetime.combine(now.date(), t)
@@ -27,10 +27,10 @@ def change_timezone(dt, tz):
     if not tz:
         return dt
     if dt.tzname():
-        #изменить часовой пояс
+        # изменить часовой пояс
         return dt.astimezone(timezone(tz))
     else:
-        #установить часовой пояс
+        # установить часовой пояс
         return timezone(tz).localize(dt, is_dst=None)
 
 
@@ -106,17 +106,17 @@ def annihilator(sourcedate, delta_sizes, offset=0):
         i = min(i, annihilator.sizes.index(delta_size))
     i -= offset
 
-    #если обнуляем по неделе - приводим дату к понедельнику этой недели
+    # если обнуляем по неделе - приводим дату к понедельнику этой недели
     if i >= 2 and 'weeks' in delta_sizes:
         sd_wday = datetime.datetime.weekday(sourcedate)
         sourcedate = sourcedate - datetime.timedelta(days=sd_wday)
         return sourcedate.date()
 
-    #не должно происходить, но на всякий случай
+    # не должно происходить, но на всякий случай
     if i == 10:
         return sourcedate
 
-    #создаём timetuple с обнуленными значениями
+    # создаём timetuple с обнуленными значениями
     default = (0, 1, 1, 0, 0, 0)
     sourcedate = sourcedate.timetuple()
     if len(sourcedate) == 3:
@@ -132,7 +132,7 @@ def annihilator(sourcedate, delta_sizes, offset=0):
 annihilator.sizes = ('years', 'months', 'days', 'hours', 'minutes', 'seconds')
 
 
-class my_timedelta:
+class my_timedelta:  # noQA
     '''
     Класс для работы с add_delta2datetime. Альтернатива типу timedelta,
     который не умеет работать с неделями, месяцами и годами.
@@ -163,19 +163,19 @@ class my_timedelta:
             new.elements.extend(obj.elements)
             return new
 
-        #если "следующий [месяц]", обнуляем всё, что меньше [месяц]
+        # если "следующий [месяц]", обнуляем всё, что меньше [месяц]
         if self.is_absolute:
             obj = annihilator(obj, self.elements[0].keys(), offset=1)
         if self.is_next:
             obj = annihilator(obj, self.elements[0].keys())
 
         for el in self.elements:
-            # +dict
+            #  +dict
             if type(el) is dict:
                 if not self.positive:
                     el = {k: -v for k, v in el.items()}
                 obj = add_delta2datetime(obj, **el)
-            # +timedelta
+            #  +timedelta
             else:
                 if self.positive:
                     obj = obj + el

@@ -88,9 +88,11 @@ def weekday(nodes, **kwargs):
     cat = 'datetime' if isinstance(dt, datetime) else 'date'
 
     dt_wday = datetime.weekday(dt)
-    if (offset and offset == 1) \
-    or cat == 'date' and dt != datetime.now().date() \
-    or cat == 'datetime' and dt.date() != datetime.now().date():
+    if (offset and offset == 1):
+        days = 7 - (dt_wday - wday) % 7
+    elif cat == 'date' and dt != datetime.now().date():
+        days = 7 - (dt_wday - wday) % 7
+    elif cat == 'datetime' and dt.date() != datetime.now().date():
         days = 7 - (dt_wday - wday) % 7
     else:
         days = wday - dt_wday
@@ -102,35 +104,35 @@ def weekday(nodes, **kwargs):
 
 
 templates = (
-    (number_and_month, 'number', 'month'), # -> date
-    (number_and_month, 'month'), # -> date
-    (make_delta, 'number', 'delta_size'), # -> delta
-    (make_delta, 'number', 'delta_size'), # -> delta
-    (make_delta, 'delta_size'), # -> delta
-    (sum_delta, 'delta', 'delta'), # -> delta
-    (sum_delta, 'delta', 'delta'), # -> delta
-    (offset, 'delta_offset', 'delta'), # -> delta
-    (offset, 'delta', 'delta_offset'), # -> delta
-    (date_and_time, 'date', 'time'), # -> datetime
-    (date_and_time, 'time', 'date'), # -> datetime
-    (dt_and_delta, 'datetime', 'delta'), # -> datetime
-    (dt_and_delta, 'delta', 'datetime'), # -> datetime
-    (date_and_delta, 'date', 'delta'), # -> datetime/date
-    (date_and_delta, 'delta', 'date'), # -> datetime/date
-    (dt_and_delta, 'delta'), # -> datetime
-    (weekday, 'delta_offset', 'weekday', 'datetime'), # -> datetime
-    (weekday, 'datetime', 'delta_offset', 'weekday'), # -> datetime
-    (weekday, 'delta_offset', 'weekday', 'date'), # -> date
-    (weekday, 'date', 'delta_offset', 'weekday'), # -> date
-    (weekday, 'delta_offset', 'weekday'), # -> date
-    (weekday, 'weekday', 'datetime'), # -> datetime
-    (weekday, 'datetime', 'weekday'), # -> datetime
-    (weekday, 'weekday', 'date'), # -> date
-    (weekday, 'date', 'weekday'), # -> date
-    (weekday, 'weekday'), # -> date
-    (date_and_time, 'date', 'time'), # -> datetime
-    (date_and_time, 'time', 'date'), # -> datetime
-    (date_and_time, 'datetime', 'time'), # -> datetime
-    (date_and_time, 'time', 'datetime'), # -> datetime
-    (date_and_time, 'time'), # -> datetime
+    (number_and_month, 'number', 'month'),  # -> date
+    (number_and_month, 'month'),            # -> date
+    (make_delta, 'number', 'delta_size'),   # -> delta
+    (make_delta, 'number', 'delta_size'),   # -> delta
+    (make_delta, 'delta_size'),             # -> delta
+    (sum_delta, 'delta', 'delta'),          # -> delta
+    (sum_delta, 'delta', 'delta'),          # -> delta
+    (offset, 'delta_offset', 'delta'),      # -> delta
+    (offset, 'delta', 'delta_offset'),      # -> delta
+    (date_and_time, 'date', 'time'),        # -> datetime
+    (date_and_time, 'time', 'date'),        # -> datetime
+    (dt_and_delta, 'datetime', 'delta'),    # -> datetime
+    (dt_and_delta, 'delta', 'datetime'),    # -> datetime
+    (date_and_delta, 'date', 'delta'),      # -> datetime/date
+    (date_and_delta, 'delta', 'date'),      # -> datetime/date
+    (dt_and_delta, 'delta'),                # -> datetime
+    (weekday, 'delta_offset', 'weekday', 'datetime'),   # -> datetime
+    (weekday, 'datetime', 'delta_offset', 'weekday'),   # -> datetime
+    (weekday, 'delta_offset', 'weekday', 'date'),       # -> date
+    (weekday, 'date', 'delta_offset', 'weekday'),       # -> date
+    (weekday, 'delta_offset', 'weekday'),   # -> date
+    (weekday, 'weekday', 'datetime'),       # -> datetime
+    (weekday, 'datetime', 'weekday'),       # -> datetime
+    (weekday, 'weekday', 'date'),           # -> date
+    (weekday, 'date', 'weekday'),           # -> date
+    (weekday, 'weekday'),                   # -> date
+    (date_and_time, 'date', 'time'),        # -> datetime
+    (date_and_time, 'time', 'date'),        # -> datetime
+    (date_and_time, 'datetime', 'time'),    # -> datetime
+    (date_and_time, 'time', 'datetime'),    # -> datetime
+    (date_and_time, 'time'),                # -> datetime
 )
