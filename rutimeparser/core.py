@@ -7,10 +7,10 @@ from .reducers import templates
 
 
 class TimeParser(object):
-    '''
+    """
     Класс для получения из текста на естественном языке даты и времени.
     Возвращает datetime, date или None.
-    '''
+    """
 
     def __init__(self, text='', words=None, tz=None, now=None):
         self.nodes = []
@@ -28,9 +28,9 @@ class TimeParser(object):
             self.tz = str(now.tzinfo)
 
     def make_nodes(self):
-        '''
+        """
         Генерирует список нод на основе слов исходного текста
-        '''
+        """
         self.nodes = []
         for i, word in enumerate(self.words):
             cat, value = get_cat(word, self.now)
@@ -38,14 +38,14 @@ class TimeParser(object):
         return self.nodes
 
     def get_nodes_by_template(self, *template):
-        '''
+        """
         Возвращает списки нод, соответствующих переданному списку категорий
-        '''
+        """
 
         def test(nodes, template):
-            '''
+            """
             Проверяет список нод на соответствие шаблону
-            '''
+            """
             if len(nodes) < len(template):
                 return False
             for node, cat in zip(nodes, template):
@@ -59,9 +59,9 @@ class TimeParser(object):
                 yield nodes
 
     def replace(self, node_from, node_to, new_node):
-        '''
+        """
         Заменяет диапазон нод новой нодой
-        '''
+        """
         new_nodes = []
         for node in self.nodes:
             if node.i < node_from.i or node.i > node_to.i:
@@ -89,15 +89,15 @@ class TimeParser(object):
         return good_chains
 
     def remove_junk(self):
-        '''
+        """
         Удаляет из текста все слова, не связанные с датой и временем
-        '''
+        """
         self.nodes = [node for node in self.nodes if node.cat != 'junk']
 
     def reduce(self):
-        '''
+        """
         Объединяет несколько нод в одну по заданным правилам
-        '''
+        """
         for f, *template in templates:
             nodes_samples = list(self.get_nodes_by_template(*template))
             for nodes in nodes_samples:
@@ -105,15 +105,15 @@ class TimeParser(object):
                 self.replace(nodes[0], nodes[-1], new_node)
 
     def to_dict(self):
-        '''
+        """
         Возвращает словарь "категория_ноды: значение_ноды"
-        '''
+        """
         return {node.cat: node.value for node in self.nodes}
 
     def get_datetime(self):
-        '''
+        """
         Возвращает результат на основе обработанных нод
-        '''
+        """
         nodes = self.to_dict()
         if 'datetime' in nodes:
             return change_timezone(nodes['datetime'], self.tz)
