@@ -46,10 +46,10 @@ def extract_word(nodes):
 
 def extract_values(nodes, *template):
     '''
-	Возвращает список значений в соответствии со списком типов нод.
-	Если ноды соответствующего типа нет среди переданных, возвращает
-	в соответствующей позиции None.
-	'''
+    Возвращает список значений в соответствии со списком типов нод.
+    Если ноды соответствующего типа нет среди переданных, возвращает
+    в соответствующей позиции None.
+    '''
     result = dict.fromkeys(template)
     for node in nodes:
         if node.cat in result:
@@ -59,9 +59,9 @@ def extract_values(nodes, *template):
 
 def add_delta2datetime(sourcedate, years=0, months=0, weeks=0, days=0, hours=0, minutes=0, seconds=0):
     '''
-	Прибавляет заданное значение к datetime. В отличиче от timedelta,
-	может принимать недели, месяцы и годы.
-	'''
+    Прибавляет заданное значение к datetime. В отличиче от timedelta,
+    может принимать недели, месяцы и годы.
+    '''
 
     days += weeks * 7
 
@@ -134,9 +134,9 @@ annihilator.sizes = ('years', 'months', 'days', 'hours', 'minutes', 'seconds')
 
 class my_timedelta:
     '''
-	Класс для работы с add_delta2datetime. Альтернатива типу timedelta,
-	который не умеет работать с неделями, месяцами и годами.
-	'''
+    Класс для работы с add_delta2datetime. Альтернатива типу timedelta,
+    который не умеет работать с неделями, месяцами и годами.
+    '''
 
     def __init__(self, **kwargs):
         self.elements = []
@@ -148,10 +148,10 @@ class my_timedelta:
 
     def __add__(self, obj):
         '''
-		Прибавление timedelta или my_timedelta добавляет его в self.elements.
-		Прибавление datetime/date складывает с ним self.elements
-		с помощью add_delta2datetime.
-		'''
+        Прибавление timedelta или my_timedelta добавляет его в self.elements.
+        Прибавление datetime/date складывает с ним self.elements
+        с помощью add_delta2datetime.
+        '''
         if isinstance(obj, datetime.timedelta):
             new = my_timedelta()
             new.elements = self.elements.copy()

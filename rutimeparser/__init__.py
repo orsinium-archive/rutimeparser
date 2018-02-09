@@ -8,9 +8,9 @@ from .reducers import templates
 
 class TimeParser:
     '''
-	Класс для получения из текста на естественном языке даты и времени.
-	Возвращает datetime, date или None.
-	'''
+    Класс для получения из текста на естественном языке даты и времени.
+    Возвращает datetime, date или None.
+    '''
 
     def __init__(self, text='', words=None, tz=None, now=None):
         if not words:
@@ -28,8 +28,8 @@ class TimeParser:
 
     def make_nodes(self):
         '''
-		Генерирует список нод на основе слов исходного текста
-		'''
+        Генерирует список нод на основе слов исходного текста
+        '''
         self.nodes = []
         for i, word in enumerate(self.words):
             cat, value = get_cat(word, self.now)
@@ -38,13 +38,13 @@ class TimeParser:
 
     def get_nodes_by_template(self, *template):
         '''
-		Возвращает списки нод, соответствующих переданному списку категорий
-		'''
+        Возвращает списки нод, соответствующих переданному списку категорий
+        '''
 
         def test(nodes, template):
             '''
-			Проверяет список нод на соответствие шаблону
-			'''
+            Проверяет список нод на соответствие шаблону
+            '''
             if len(nodes) < len(template):
                 return False
             for node, cat in zip(nodes, template):
@@ -59,8 +59,8 @@ class TimeParser:
 
     def replace(self, node_from, node_to, new_node):
         '''
-		Заменяет диапазон нод новой нодой
-		'''
+        Заменяет диапазон нод новой нодой
+        '''
         new_nodes = []
         for node in self.nodes:
             if node.i < node_from.i or node.i > node_to.i:
@@ -89,14 +89,14 @@ class TimeParser:
 
     def remove_junk(self):
         '''
-		Удаляет из текста все слова, не связанные с датой и временем
-		'''
+        Удаляет из текста все слова, не связанные с датой и временем
+        '''
         self.nodes = [node for node in self.nodes if node.cat != 'junk']
 
     def reduce(self):
         '''
-		Объединяет несколько нод в одну по заданным правилам
-		'''
+        Объединяет несколько нод в одну по заданным правилам
+        '''
         for f, *template in templates:
             nodes_samples = list(self.get_nodes_by_template(*template))
             for nodes in nodes_samples:
@@ -105,14 +105,14 @@ class TimeParser:
 
     def __dict__(self):
         '''
-		Возвращает словарь "категория_ноды: значение_ноды"
-		'''
+        Возвращает словарь "категория_ноды: значение_ноды"
+        '''
         return {node.cat: node.value for node in self.nodes}
 
     def get_datetime(self):
         '''
-		Возвращает результат на основе обработанных нод
-		'''
+        Возвращает результат на основе обработанных нод
+        '''
         nodes = self.__dict__()
         if 'datetime' in nodes:
             return change_timezone(nodes['datetime'], self.tz)
@@ -143,9 +143,9 @@ class TimeParser:
 
 def parse_time(text, *, tz=None, now=None, remove_junk=True, debug=False):
     '''
-	Для тех, кто не любит классы. Выполняет все необходимые операции
-	с текстом и возвращает результат.
-	'''
+    Для тех, кто не любит классы. Выполняет все необходимые операции
+    с текстом и возвращает результат.
+    '''
     tp = TimeParser(text, tz=tz, now=now)
     tp.make_nodes()
     if debug:
@@ -159,8 +159,8 @@ def parse_time(text, *, tz=None, now=None, remove_junk=True, debug=False):
 
 def get_clear_text(text, debug=False):
     '''
-	Возвращает фрагменты, не связанные с датой и временем
-	'''
+    Возвращает фрагменты, не связанные с датой и временем
+    '''
     tp = TimeParser(text)
     tp.make_nodes()
     if debug:
@@ -171,8 +171,8 @@ def get_clear_text(text, debug=False):
 
 def get_last_clear_text(text, debug=False):
     '''
-	Возвращает последний фрагмент, не связанный с датой и временем
-	'''
+    Возвращает последний фрагмент, не связанный с датой и временем
+    '''
     tp = TimeParser(text)
     tp.make_nodes()
     if debug:
