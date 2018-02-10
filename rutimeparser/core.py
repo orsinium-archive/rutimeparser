@@ -8,28 +8,37 @@ from .utils import ngrams, Node, get_now, change_timezone
 from .reducers import templates
 
 
+
+try:
+    string_types = (str, unicode)
+except NameError:
+    string_types = (str, )
+
+
+
 class TimeParser(object):
     """
     Класс для получения из текста на естественном языке даты и времени.
     Возвращает datetime, date или None.
     """
 
-    allowed_results = (datetime, date, time, None)
-    default_time = time(9, 0)
-
-    def __init__(self, text='', words=None, tz=None, now=None):
+    def __init__(self, words=None, tz=None, now=None,
+                 allowed_results=(datetime, date, time, None),
+                 default_time=time(9, 0), default_datetime=None):
         self.nodes = []
         self.reduced = False
 
-        if not words:
-            if not text:
-                raise ValueError('Please, set text or words for TimeParser.')
-            self.words = tuple(get_words(text))
+        if isinstance(words, string_types):
+            self.words = tuple(get_words(words))
         else:
             self.words = words
 
         self.tz = tz
         self.now = now if now else get_now(self.tz)
+
+        self.allowed_results = allowed_results
+        self.default_time = default_time
+        self.default_datetime = default_datetime if default_datetime is not None else self.now
 
         if not self.tz and now and now.tzinfo:
             self.tz = str(now.tzinfo)
@@ -129,10 +138,17 @@ class TimeParser(object):
             self.make_nodes()
         return {node.cat: node.value for node in self.nodes}
 
-    def parse(self):
+    def parse(self, words=None):
         """
         Возвращает результат на основе обработанных нод
         """
+
+        if words is not None:
+            if isinstance(words, string_types):
+                self.words = tuple(get_words(text))
+            else:
+                self.words = words
+
         if not self.nodes:
             self.make_nodes()
         if not self.reduced:
@@ -165,21 +181,26 @@ class TimeParser(object):
             return result_time
 
         # ищем адаптированный результат
-        if datetime in self.allowed_results and result_time is not None:
-            result = datetime.combine(self.now.date(), result_time)
-            return change_timezone(result, self.tz)
-        if datetime in self.allowed_results and result_date is not None:
-            result = datetime.combine(result_date, self.default_time)
-            return change_timezone(result, self.tz)
+        if datetime in self.allowed_results:
+            if result_time is not None:
+                result = datetime.combine(self.now.date(), result_time)
+                return change_timezone(result, self.tz)
+            if result_date is not None:
+                result = datetime.combine(result_date, self.default_time)
+                return change_timezone(result, self.tz)
+        if date in self.allowed_results and result_datetime is not None:
+            return result_datetime.date()
+        if time in self.allowed_results and result_datetime is not None:
+            return result_datetime.time()
 
         # возвращаем результат по умолчанию
         if None not in self.allowed_results:
             if datetime in self.allowed_results:
-                return self.now
+                return self.default_datetime
             if date in self.allowed_results:
-                return self.now.date()
+                return self.default_datetime.date()
             if time in self.allowed_results:
-                return self.now.time()
+                return self.default_datetime.time()
             raise KeyError('Не найден результат, соответствующий значению allowed_results')
 
     def get_datetime(self):
@@ -195,8 +216,7 @@ class TimeParser(object):
         """
         result = []
         for chain in self.get_junk_chains():
-            for node in chain:
-                result.append(node.word)
+            result.extend([node.word for node in chain])
         return ' '.join(result)
 
     def get_last_clear_text(self):

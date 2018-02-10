@@ -1,5 +1,5 @@
 import unittest
-from rutimeparser import parse_time
+from rutimeparser import parse
 from datetime import datetime, timedelta, time
 
 templates = (
@@ -116,7 +116,7 @@ class TestParser(unittest.TestCase):
         for src_text, good, is_date in common_tests:
             with self.subTest(src_text=src_text):
                 for text in make_mutations(src_text):
-                    result = parse_time(text)
+                    result = parse(text)
                     self.compare(result, good, is_date)
 
     def test_delta(self):
@@ -131,7 +131,7 @@ class TestParser(unittest.TestCase):
             good = datetime(year + 1, 4, 7)
         for text in make_mutations(*texts):
             with self.subTest(text=text):
-                result = parse_time(text)
+                result = parse(text)
                 self.compare(result, good, True)
 
     def test_weekday(self):
@@ -146,7 +146,7 @@ class TestParser(unittest.TestCase):
 
         for text in make_mutations('в апреле в среду'):
             with self.subTest(text=text):
-                result = parse_time(text)
+                result = parse(text)
                 self.compare(result, good, True)
 
     def test_weekday_and_time(self):
@@ -161,7 +161,7 @@ class TestParser(unittest.TestCase):
         src_text = 'в апреле в четверг в 17:43'
         with self.subTest(text=src_text):
             for text in make_mutations(src_text):
-                result = parse_time(text)
+                result = parse(text)
                 self.compare(result, good, False)
 
 

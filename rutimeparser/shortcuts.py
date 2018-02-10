@@ -1,18 +1,34 @@
+from datetime import datetime, date, time
+import warnings
+
 from .core import TimeParser
 
 
-__all__ = ['parse_time', 'get_clear_text', 'get_last_clear_text']
+__all__ = ['parse', 'parse_time', 'get_clear_text', 'get_last_clear_text']
 
 
-def parse_time(text, *, tz=None, now=None, remove_junk=True):
+def parse(words, tz=None, now=None, remove_junk=True,
+          allowed_results=(datetime, date, time, None),
+          default_time=time(9, 0), default_datetime=None):
     """
-    Для тех, кто не любит классы. Выполняет все необходимые операции
-    с текстом и возвращает результат.
+    Выполняет все необходимые операции с текстом и возвращает результат.
     """
-    parser = TimeParser(text, tz=tz, now=now)
+    parser = TimeParser(
+        words, tz=None, now=None,
+        allowed_results=(datetime, date, time, None),
+        default_time=time(9, 0), default_datetime=None,
+    )
     if remove_junk:
         parser.remove_junk()
     return parser.parse()
+
+
+def parse_time(*args, **kwargs):
+    warnings.warn(
+        "parse_time function deprecated. Use parse function instead",
+        DeprecationWarning,
+    )
+    return parse(*args, **kwargs)
 
 
 def get_clear_text(text):
