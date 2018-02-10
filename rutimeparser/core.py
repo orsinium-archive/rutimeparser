@@ -19,7 +19,33 @@ except NameError:
 class TimeParser(object):
     """
     Класс для получения из текста на естественном языке даты и времени.
-    Возвращает datetime, date или None.
+
+    :param words: Строка с текстом или список слов. Параметр является необязательным,
+        т.к. может быть передан непосредственно в метод `parse`.
+    :type words: str  текст
+    :type words: list список слов
+
+    :param tz: Название часового пояса. Если не указано, возвращается наивное время.
+    :type tz:  str
+
+    :param now: От какого момента считать текущее время
+    :type now:  datetime.datetime
+
+    :param allowed_results: Список объектов, которые могут быть возвращены
+        методом `parse`. Возможные значения: datetime, date, time, None.
+    :type allowed_results: list
+    :type allowed_results: tuple
+
+    :param default_time: Время по умолчанию. Используется только в том случае,
+        если из текста удалось получить только date, но необходимо вернуть datetime.
+        По умолчанию 09:00.
+    :type default_time: datetime.time
+
+    :param default_datetime: Дата и время по умолчанию. Возвращается методом `parse`,
+        если в тексте не удалось найти значение, подходящее под `allowed_results`.
+        По умолчанию равен значению параметра `now`.
+    :type default_datetime: datetime.datetime
+
     """
 
     def __init__(self, words=None, tz=None, now=None,
