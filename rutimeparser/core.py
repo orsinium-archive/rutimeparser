@@ -1,5 +1,7 @@
+# built-in
 from datetime import datetime, date, time
-
+import warnings
+# project
 from .get_words import get_words
 from .get_cat import get_cat
 from .utils import ngrams, Node, get_now, change_timezone
@@ -17,6 +19,8 @@ class TimeParser(object):
 
     def __init__(self, text='', words=None, tz=None, now=None):
         self.nodes = []
+        self.reduced = False
+
         if not words:
             if not text:
                 raise ValueError('Please, set text or words for TimeParser.')
@@ -75,6 +79,12 @@ class TimeParser(object):
         return new_nodes
 
     def get_junk_chains(self):
+        """
+        Возвращает список цепочек нод с типом junk.
+        """
+        if not self.nodes:
+            self.make_nodes()
+        # выбираем все цепочки нод типа junk
         chains = []
         chain = []
         for node in self.nodes:
@@ -85,6 +95,7 @@ class TimeParser(object):
                 chain = []
         chains.append(chain)
 
+        # выкидываем незначительные цепочки
         good_chains = []
         for chain in chains:
             if len(chain) > 2 or any([len(node.word) > 3 for node in chain]):
@@ -95,6 +106,8 @@ class TimeParser(object):
         """
         Удаляет из текста все слова, не связанные с датой и временем
         """
+        if not self.nodes:
+            self.make_nodes()
         self.nodes = [node for node in self.nodes if node.cat != 'junk']
 
     def reduce(self):
@@ -106,6 +119,7 @@ class TimeParser(object):
             for nodes in nodes_samples:
                 new_node = f(nodes, now=self.now)
                 self.replace(nodes[0], nodes[-1], new_node)
+        self.reduced = True
 
     def to_dict(self):
         """
@@ -119,6 +133,10 @@ class TimeParser(object):
         """
         Возвращает результат на основе обработанных нод
         """
+        if not self.nodes:
+            self.make_nodes()
+        if not self.reduced:
+            self.reduce()
         nodes = self.to_dict()
 
         # получаем значения нод, отвечающих за дату и время
@@ -165,9 +183,16 @@ class TimeParser(object):
             raise KeyError('Не найден результат, соответствующий значению allowed_results')
 
     def get_datetime(self):
+        warnings.warn(
+            "TimeParser.get_datetime() deprecated. Use TimeParser.parse() instead",
+            DeprecationWarning,
+        )
         return self.parse()
 
     def get_clear_text(self):
+        """
+        Возвращает текст, содержащий только слова, не связанные с датой и временем
+        """
         result = []
         for chain in self.get_junk_chains():
             for node in chain:
@@ -175,6 +200,10 @@ class TimeParser(object):
         return ' '.join(result)
 
     def get_last_clear_text(self):
+        """
+        Возвращает последний фрагмент текст,
+        содержащий только слова, не связанные с датой и временем
+        """
         chains = list(self.get_junk_chains())
         if not chains:
             return ''
