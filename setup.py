@@ -5,11 +5,11 @@ from setuptools import setup
 
 setup(
     name='rutimeparser',
-    version='1.0.0',
+    version='1.1.0',
     author='orsinium',
     author_email='master_fess@mail.ru',
     description='Recognize date and time in russian text.',
-    long_description=open('README.md').read(),
+    long_description=open('README.rst').read(),
     keywords='timeparser parse date time datetime russian text',
     packages=['rutimeparser'],
     requires=['python (>= 3.4)'],
