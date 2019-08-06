@@ -8,12 +8,10 @@ from .utils import ngrams, Node, get_now, change_timezone
 from .reducers import templates
 
 
-
 try:
     string_types = (str, unicode)
 except NameError:
     string_types = (str, )
-
 
 
 class TimeParser(object):
@@ -75,7 +73,7 @@ class TimeParser(object):
         """
         self.nodes = []
         for i, word in enumerate(self.words):
-            cat, value = get_cat(word, self.now)
+            cat, value = get_cat(word=word, now=self.now)
             self.nodes.append(Node(i, cat, word, value))
         return self.nodes
 
@@ -171,7 +169,7 @@ class TimeParser(object):
 
         if words is not None:
             if isinstance(words, string_types):
-                self.words = tuple(get_words(text))
+                self.words = tuple(get_words(words))
             else:
                 self.words = words
 
@@ -227,7 +225,8 @@ class TimeParser(object):
                 return self.default_datetime.date()
             if time in self.allowed_results:
                 return self.default_datetime.time()
-            raise KeyError('Не найден результат, соответствующий значению allowed_results')
+            msg = 'Не найден результат, соответствующий значению allowed_results'
+            raise KeyError(msg)
 
     def get_datetime(self):
         warnings.warn(

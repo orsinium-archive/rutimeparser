@@ -77,22 +77,22 @@ def date_and_delta(nodes, **kwargs):
     return Node(nodes[0].i, cat, extract_word(nodes), value)
 
 
-def weekday(nodes, **kwargs):
+def weekday(nodes, now):
     '[в апреле] [в следующий] [вторник]'
     offset, wday, dt = extract_values(nodes, 'delta_offset', 'weekday', 'datetime')
     if not dt:
         dt = extract_values(nodes, 'date')[0]
         if not dt:
-            dt = datetime.now().date()
+            dt = now.date()
 
     cat = 'datetime' if isinstance(dt, datetime) else 'date'
 
     dt_wday = datetime.weekday(dt)
     if (offset and offset == 1):
         days = 7 - (dt_wday - wday) % 7
-    elif cat == 'date' and dt != datetime.now().date():
+    elif cat == 'date' and dt != now.date():
         days = 7 - (dt_wday - wday) % 7
-    elif cat == 'datetime' and dt.date() != datetime.now().date():
+    elif cat == 'datetime' and dt.date() != now.date():
         days = 7 - (dt_wday - wday) % 7
     else:
         days = wday - dt_wday
