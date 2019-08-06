@@ -9,7 +9,7 @@ setup(
     author='orsinium',
     author_email='master_fess@mail.ru',
     description='Recognize date and time in russian text.',
-    long_description=open('README.rst').read(),
+    long_description=open('README.rst', encoding='utf8').read(),
     keywords='timeparser parse date time datetime russian text',
     packages=['rutimeparser'],
     requires=['python (>= 3.4)'],

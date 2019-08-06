@@ -14,9 +14,9 @@ def parse(words, tz=None, now=None, remove_junk=True,
     Выполняет все необходимые операции с текстом и возвращает результат.
     """
     parser = TimeParser(
-        words, tz=None, now=None,
-        allowed_results=(datetime, date, time, None),
-        default_time=time(9, 0), default_datetime=None,
+        words, tz=tz, now=now,
+        allowed_results=allowed_results,
+        default_time=default_time, default_datetime=default_datetime,
     )
     if remove_junk:
         parser.remove_junk()
