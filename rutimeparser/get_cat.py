@@ -74,13 +74,22 @@ def month(word, **kwargs):
             return ms.index(word) + 1
 
 
-fs = (date, time, number, delta_offset, delta_size, weekday, month, my_datetime)
+_GETTERS = (
+    date,
+    time,
+    number,
+    delta_offset,
+    delta_size,
+    weekday,
+    month,
+    my_datetime,
+)
 
 
 def get_cat(word, now):
     'Принимает на вход слово и возвращает ноду'
-    for f in fs:
-        result = f(word, now=now)
+    for getter in _GETTERS:
+        result = getter(word, now=now)
         if result is not None:
-            return f.__name__, result
+            return getter.__name__, result
     return 'junk', word

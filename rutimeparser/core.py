@@ -225,7 +225,8 @@ class TimeParser(object):
                 return self.default_datetime.date()
             if time in self.allowed_results:
                 return self.default_datetime.time()
-            raise KeyError('Не найден результат, соответствующий значению allowed_results')
+            msg = 'Не найден результат, соответствующий значению allowed_results'
+            raise KeyError(msg)
 
     def get_datetime(self):
         warnings.warn(
