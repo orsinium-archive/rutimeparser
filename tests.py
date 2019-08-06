@@ -21,7 +21,6 @@ def make_mutations(*texts):
 
 
 def date_with_year(month, day):
-    now = datetime.now()
     result = datetime(now.year, month, day).date()
     if result >= now.date():
         return result
@@ -35,7 +34,7 @@ def datetime_with_year(month, day, hours=0, minutes=0, seconds=0):
     return datetime.combine(d, t)
 
 
-now = datetime.now()
+now = datetime(2017, 2, 9, 14, 49, 13)
 morning = datetime.combine(now.date(), time(9, 0))
 monday = now - timedelta(days=datetime.weekday(now))
 monday_morning = datetime.combine(monday.date(), morning.time())
@@ -116,7 +115,7 @@ class TestParser(unittest.TestCase):
         for src_text, good, is_date in common_tests:
             with self.subTest(src_text=src_text):
                 for text in make_mutations(src_text):
-                    result = parse(text)
+                    result = parse(text, now=now)
                     self.compare(result, good, is_date)
 
     def test_delta(self):
@@ -131,7 +130,7 @@ class TestParser(unittest.TestCase):
             good = datetime(year + 1, 4, 7)
         for text in make_mutations(*texts):
             with self.subTest(text=text):
-                result = parse(text)
+                result = parse(text, now=now)
                 self.compare(result, good, True)
 
     def test_weekday(self):
@@ -146,7 +145,7 @@ class TestParser(unittest.TestCase):
 
         for text in make_mutations('в апреле в среду'):
             with self.subTest(text=text):
-                result = parse(text)
+                result = parse(text, now=now)
                 self.compare(result, good, True)
 
     def test_weekday_and_time(self):
@@ -161,7 +160,7 @@ class TestParser(unittest.TestCase):
         src_text = 'в апреле в четверг в 17:43'
         with self.subTest(text=src_text):
             for text in make_mutations(src_text):
-                result = parse(text)
+                result = parse(text, now=now)
                 self.compare(result, good, False)
 
 
